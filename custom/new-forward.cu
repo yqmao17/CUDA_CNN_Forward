@@ -3,6 +3,7 @@
 #include "gpu-new-forward.h"
 
 #define TILE_WIDTH 8
+#define TILE_W 8
 #define BLOCK_SIZE 512
 
 // original kernel func
@@ -73,7 +74,7 @@ __global__ void matrixMultiplyShared(float *A, float *B, float *C, int numARows,
     int by_idx = blockIdx.y;
     int tx_idx = threadIdx.x;
     int ty_idx = threadIdx.y;
-    
+
     int row = by_idx * TILE_W + ty_idx;
     int col = bx_idx * TILE_W + tx_idx;
     float accu = 0;
@@ -162,7 +163,7 @@ __host__ void GPUInterface::conv_forward_gpu(float *host_y, const float *host_x,
     int W_unroll = H_out * W_out;
     int H_unroll = C * K * K;
     cudaMalloc((void **) &X_unrolled, W_unroll * H_unroll * sizeof(float));
-    for(int b = 0; b < B; b++){ 
+    for(int b = 0; b < B; b++){
         unroll_to_gpu(C, H, W, K, device_x+b*C*H*W, X_unrolled);
         matrixMultiply(device_k, X_unrolled, device_y+b*M*H_out*W_out, H_unroll, M, W_unroll);
     }
